@@ -12,9 +12,8 @@ const login = async (req, res) => {
         res.status(200).json({
             errors: [],
             data: {
-                token: token,
-                isAuthenticated: true,
                 userDetails: {
+                    token: token,
                     id: _User.id,
                     firstName: _User.firstName,
                     lastName: _User.lastName,

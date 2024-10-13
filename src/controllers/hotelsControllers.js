@@ -1,5 +1,6 @@
 const Hotels = require('../models/hotelsModel');
 const Country = require('../models/countriesModel');
+const FilterGroup = require('../models/filterGroupModel');
 const getHotels = async (req, res) => {
     const hotels = await Hotels.find();
     const hotelsData = hotels;
@@ -58,13 +59,10 @@ const getHotels = async (req, res) => {
     });
 };
 const reviews = async (req, res) => {
-    const hotels = await Hotels.find();
-    const hotelsData = hotels;
-    const currentPage = req.body.currentPage;
-    let hotelId = 71222;
-    const result = hotelsData.find((hotel) => {
-        return Number(hotel.hotelCode) === Number(hotelId);
+    const result = await Hotels.findOne({
+        _id: req.body.hotelId,
     });
+    const currentPage = req.body.currentPage;
     const totalRatings = result.reviews.data.reduce((acc, review) => acc + review.rating, 0);
     const initialCounts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
     const starCounts = result.reviews.data.reduce((acc, review) => {
@@ -101,70 +99,22 @@ const reviews = async (req, res) => {
     });
 };
 const hotelDetails = async (req, res) => {
-    let hotelId = req.params.hotelId;
-    const description = [
-        'A serene stay awaits at our plush hotel, offering a blend of luxury and comfort with top-notch amenities.',
-        'Experience the pinnacle of elegance in our beautifully designed rooms with stunning cityscape views.',
-        'Indulge in gastronomic delights at our in-house restaurants, featuring local and international cuisines.',
-        'Unwind in our state-of-the-art spa and wellness center, a perfect retreat for the senses.',
-        'Located in the heart of the city, our hotel is the ideal base for both leisure and business travelers.',
-    ];
-    const hotels = await Hotels.find();
-    const result = hotels.find((hotel) => {
-        return Number(hotel.hotelCode) === Number(hotelId);
-    });
-
-    result.description = description;
-    res.status(200).send({
-        errors: [],
-        data: result,
-    });
+    try {
+        const hotelResult = await Hotels.findOne({
+            hotelCode: req.params.hotelId,
+        });
+        res.status(200).json({ data: hotelResult });
+    } catch (err) {
+        res.status(500).json({ message: err });
+    }
 };
 const verticalFilters = async (req, res) => {
+    const filterResults = await FilterGroup.find();
+    console.log(filterResults);
     res.status(200).json({
         errors: [],
         data: {
-            elements: [
-                {
-                    filterId: 'star_ratings',
-                    title: 'Star ratings',
-                    filters: [
-                        {
-                            id: '5_star_rating',
-                            title: '5 Star',
-                            value: '5',
-                        },
-                        {
-                            id: '4_star_rating',
-                            title: '4 Star',
-                            value: '4',
-                        },
-                        {
-                            id: '3_star_rating',
-                            title: '3 Star',
-                            value: '3',
-                        },
-                    ],
-                },
-                {
-                    filterId: 'propety_type',
-                    title: 'Property type',
-                    filters: [
-                        {
-                            id: 'prop_type_hotel',
-                            title: 'Hotel',
-                        },
-                        {
-                            id: 'prop_type_apartment',
-                            title: 'Apartment',
-                        },
-                        {
-                            id: 'prop_type_villa',
-                            title: 'Villa',
-                        },
-                    ],
-                },
-            ],
+            elements: filterResults,
         },
     });
 };
@@ -176,7 +126,7 @@ const country = async (req, res) => {
         res.json(newCountry);
     } catch (err) {
         console.error(err);
-        res.status(500).json({ message: 'Lỗi khi thêm quốc gia' });
+        res.status(500).json({ message: 'Err' });
     }
 };
 const getCountry = async (req, res) => {
@@ -212,6 +162,40 @@ const enquiry = async (req, res) => {
     } catch (err) {}
 };
 const addReviews = async (req, res) => {
-    res.send('ok');
+    try {
+        const hotel = await Hotels.findOne({
+            _id: req.body.hotelId,
+        });
+        if (!hotel) {
+            return res.status(404).json({ message: 'Hotel not found' });
+        }
+
+        const newReview = req.body;
+
+        // Validation to check for required fields
+        if (!newReview.reviewerName || !newReview.rating || !newReview.review || !newReview.date) {
+            return res.status(400).json({ message: 'Missing required fields' });
+        }
+
+        // Add the new review to the hotel's reviews
+        hotel.reviews.data.push({
+            reviewerName: newReview.reviewerName,
+            rating: newReview.rating,
+            review: newReview.review,
+            date: newReview.date,
+            verified: newReview.verified || false, // Set verified to false if not provided
+        });
+
+        await hotel.save();
+
+        res.send({
+            errors: [],
+            data: {
+                status: 'Review added successfully',
+            },
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Error adding review', error });
+    }
 };
 module.exports = { getHotels, verticalFilters, country, getCountry, hotelDetails, reviews, enquiry, addReviews };

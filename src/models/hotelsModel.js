@@ -1,5 +1,11 @@
 const mongoose = require('mongoose');
-
+const reviewSchema = new mongoose.Schema({
+    reviewerName: { type: String, required: true },
+    rating: { type: Number, required: true },
+    review: { type: String, required: true },
+    date: { type: String, required: true },
+    verified: { type: Boolean, default: false },
+});
 const hotelSchema = new mongoose.Schema({
     hotelCode: Number,
     images: [
@@ -15,15 +21,7 @@ const hotelSchema = new mongoose.Schema({
     ratings: String,
     city: String,
     reviews: {
-        data: [
-            {
-                reviewerName: String,
-                rating: Number,
-                review: String,
-                date: Date,
-                verified: Boolean,
-            },
-        ],
+        data: [reviewSchema],
     },
 });
 
