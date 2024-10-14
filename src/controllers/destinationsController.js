@@ -5,7 +5,6 @@ const getPopularDestinations = async (req, res) => {
     try {
         const _popularDestinations = await popularDestinations.find();
         res.status(200).send({
-            errors: [],
             data: {
                 elements: _popularDestinations,
             },
@@ -30,7 +29,6 @@ const nearbyHotels = async (req, res) => {
 };
 const availableCities = async (req, res) => {
     try {
-        // const _availableCities = await Hotels.find({ city: 'pune' });
         res.status(200).json({
             errors: [],
             data: {

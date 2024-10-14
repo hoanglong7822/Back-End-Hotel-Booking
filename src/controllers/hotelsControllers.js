@@ -9,7 +9,6 @@ const getHotels = async (req, res) => {
     const sortByFilter = advancedFilters.find((filter) => {
         return filter.sortBy;
     });
-
     const filteredResults = hotelsData.filter((hotel) => {
         const hotelRating = hotel.ratings;
         const isCityMatch = city === '' || hotel.city === city;
@@ -148,7 +147,6 @@ const enquiry = async (req, res) => {
             return Number(hotel.hotelCode) === Number(hotelId);
         });
         res.status(200).send({
-            errors: [],
             data: {
                 name: result.title,
                 cancellationPolicy: 'Free cancellation 1 day prior to stay',
