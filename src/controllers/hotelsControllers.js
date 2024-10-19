@@ -140,6 +140,7 @@ const getCountry = async (req, res) => {
         });
     } catch (err) {}
 };
+/////////////thiếu hotel code
 const enquiry = async (req, res) => {
     try {
         ///
@@ -214,12 +215,7 @@ const addReviews = async (req, res) => {
 
         await hotel.save();
 
-        res.send({
-            errors: [],
-            data: {
-                status: 'Review added successfully',
-            },
-        });
+        res.status(200).send({ data: { status: 'Review added successfully' } });
     } catch (error) {
         res.status(500).json({ message: 'Error adding review', error });
     }
