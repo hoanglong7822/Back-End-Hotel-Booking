@@ -1,6 +1,8 @@
 const Hotels = require('../models/hotelsModel');
+const Booking = require('../models/bookingsModel');
 const Country = require('../models/countriesModel');
 const FilterGroup = require('../models/filterGroupModel');
+
 const getHotels = async (req, res) => {
     const hotels = await Hotels.find();
     const hotelsData = hotels;
@@ -124,7 +126,6 @@ const country = async (req, res) => {
         await newCountry.save();
         res.json(newCountry);
     } catch (err) {
-        console.error(err);
         res.status(500).json({ message: 'Err' });
     }
 };
@@ -141,23 +142,50 @@ const getCountry = async (req, res) => {
 };
 const enquiry = async (req, res) => {
     try {
-        const _Hotels = await Hotels.find();
-        let hotelId = req.params.hotelId;
-        const result = _Hotels.find((hotel) => {
-            return Number(hotel.hotelCode) === Number(hotelId);
+        ///
+        console.log(req.body);
+        const { start_date, end_date, roomId } = req.body;
+        const hotel = await Hotels.findOne({
+            hotelCode: 71222,
         });
+        const roomTypes = hotel.roomTypes;
+        const room = roomTypes.find((room) => {
+            return room.roomId === roomId;
+        });
+        const bookings = await Booking.find({
+            roomId: roomId,
+        });
+        const dateObj = new Date(start_date);
+        const convertedStartDate = dateObj.getFullYear() + '-' + (dateObj.getMonth() + 1) + '-' + dateObj.getDate();
+        const startDate = new Date(convertedStartDate);
+        const endDateObj = new Date(end_date);
+        const convertedEndDate =
+            endDateObj.getFullYear() + '-' + (endDateObj.getMonth() + 1) + '-' + endDateObj.getDate();
+        const endDate = new Date(convertedEndDate);
+        let totalRooms = 0;
+        bookings.forEach((booking) => {
+            const checkInDate = new Date(booking.checkIn.split('-').reverse().join('-'));
+            const checkOutDate = new Date(booking.checkOut.split('-').reverse().join('-'));
+            if (endDate <= checkInDate || startDate >= checkOutDate) {
+                totalRooms = totalRooms + 1;
+            }
+        });
+        const maxRoomsAllowedPerGuest = room.quantity - bookings.length - totalRooms;
+        console.log(hotel);
         res.status(200).send({
             data: {
-                name: result.title,
+                name: hotel.title,
                 cancellationPolicy: 'Free cancellation 1 day prior to stay',
                 checkInTime: '12:00 PM',
                 checkOutTime: '10:00 AM',
-                currentNightRate: result.price,
+                currentNightRate: room.price,
                 maxGuestsAllowed: 5,
-                maxRoomsAllowedPerGuest: 3,
+                maxRoomsAllowedPerGuest: maxRoomsAllowedPerGuest,
             },
         });
-    } catch (err) {}
+    } catch (err) {
+        res.status(400).json(err);
+    }
 };
 const addReviews = async (req, res) => {
     try {
@@ -196,4 +224,55 @@ const addReviews = async (req, res) => {
         res.status(500).json({ message: 'Error adding review', error });
     }
 };
-module.exports = { getHotels, verticalFilters, country, getCountry, hotelDetails, reviews, enquiry, addReviews };
+const reservationRequest = async (req, res) => {
+    try {
+        const { start_date, end_date, roomId } = req.body;
+        const hotel = await Hotels.findOne({
+            hotelCode: 71222,
+        });
+        const roomTypes = hotel.roomTypes;
+        const room = roomTypes.find((room) => {
+            return room.roomId === roomId;
+        });
+        const bookings = await Booking.find({
+            roomId: roomId,
+        });
+        //////////////////
+        const dateObj = new Date(start_date);
+        const convertedStartDate = dateObj.getFullYear() + '-' + (dateObj.getMonth() + 1) + '-' + dateObj.getDate();
+        const startDate = new Date(convertedStartDate);
+        console.log(startDate);
+        const endDateObj = new Date(end_date);
+        const convertedEndDate =
+            endDateObj.getFullYear() + '-' + (endDateObj.getMonth() + 1) + '-' + endDateObj.getDate();
+        const endDate = new Date(convertedEndDate);
+        console.log(endDate);
+        ///////////////////
+
+        let totalRooms = 0;
+        bookings.forEach((booking) => {
+            const checkInDate = new Date(booking.checkIn.split('-').reverse().join('-'));
+            const checkOutDate = new Date(booking.checkOut.split('-').reverse().join('-'));
+            if (endDate <= checkInDate || startDate >= checkOutDate) {
+                totalRooms = totalRooms + 1;
+            }
+        });
+        console.log('Số phòng đã đặt là', bookings.length - totalRooms);
+        console.log('Số phòng trống là', room.quantity - bookings.length - totalRooms);
+
+        res.json('OK');
+    } catch (err) {
+        res.json('lỗi').status(404);
+    }
+};
+module.exports = {
+    getHotels,
+    verticalFilters,
+    country,
+    getCountry,
+    hotelDetails,
+    reviews,
+    enquiry,
+    addReviews,
+    reservationRequest,
+};

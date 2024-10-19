@@ -20,6 +20,16 @@ const hotelSchema = new mongoose.Schema({
     price: String,
     ratings: String,
     city: String,
+    roomTypes: [
+        {
+            roomId: { type: String, required: true, unique: true },
+            roomType: String, // Example: "Standard", "Deluxe", "Suite"
+            description: String,
+            amenities: [String], // Example: "Air conditioning", "TV", "Wi-Fi"
+            price: String,
+            quantity: String,
+        },
+    ],
     reviews: {
         data: [reviewSchema],
     },

@@ -10,6 +10,7 @@ const bookingSchema = new mongoose.Schema({
     checkOut: { type: String, required: true },
     guests: { type: Number, required: true },
     hotelCode: { type: String, required: true },
+    roomId: { type: String, required: true },
     hotelName: { type: String, required: true },
     total: { type: String, required: true },
     rooms: { type: Number, required: true },

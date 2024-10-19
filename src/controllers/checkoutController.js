@@ -57,6 +57,7 @@ const bookings = async (req, res) => {
 const createBooking = async (req, res) => {
     try {
         const bookingData = req.body;
+        console.log(req.body);
         const newBooking = new Booking(bookingData);
         await newBooking.save();
         res.status(201).json({ message: 'Booking created successfully', booking: newBooking });

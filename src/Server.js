@@ -1,7 +1,6 @@
 const express = require('express');
 const app = express();
 require('dotenv').config();
-const port = 3030;
 const Router = require('./routes/index');
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -11,7 +10,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 connection();
 app.use('/', Router);
-
-app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`);
+const PORT = process.env.PORT;
+app.listen(PORT, () => {
+    console.log(`Example app listening on port ${PORT}`);
 });
