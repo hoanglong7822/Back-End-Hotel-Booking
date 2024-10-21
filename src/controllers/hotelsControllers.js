@@ -104,7 +104,6 @@ const hotelDetails = async (req, res) => {
 };
 const verticalFilters = async (req, res) => {
     const filterResults = await FilterGroup.find();
-    console.log(filterResults);
     res.status(200).json({
         errors: [],
         data: {
@@ -136,11 +135,10 @@ const getCountry = async (req, res) => {
 /////////////thiếu hotel code
 const enquiry = async (req, res) => {
     try {
-        ///
-        console.log(req.body);
         const { start_date, end_date, roomId } = req.body;
+        console.log(req.params.hotelId);
         const hotel = await Hotels.findOne({
-            hotelCode: 71222,
+            hotelCode: req.params.hotelId,
         });
         const roomTypes = hotel.roomTypes;
         const room = roomTypes.find((room) => {
@@ -164,8 +162,7 @@ const enquiry = async (req, res) => {
                 totalRooms = totalRooms + 1;
             }
         });
-        const maxRoomsAllowedPerGuest = room.quantity - bookings.length - totalRooms;
-        console.log(hotel);
+        const maxRoomsAllowedPerGuest = room.quantity - (bookings.length - totalRooms);
         res.status(200).send({
             name: hotel.title,
             cancellationPolicy: 'Free cancellation 1 day prior to stay',

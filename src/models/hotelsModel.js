@@ -22,7 +22,7 @@ const hotelSchema = new mongoose.Schema({
     city: String,
     roomTypes: [
         {
-            roomId: { type: String, required: true, unique: true },
+            roomId: { type: String, required: true },
             roomType: String, // Example: "Standard", "Deluxe", "Suite"
             description: String,
             amenities: [String], // Example: "Air conditioning", "TV", "Wi-Fi"
