@@ -90,14 +90,7 @@ const reviews = async (req, res) => {
 
     // paginated data
     const data = result.reviews.data.slice((paging.currentPage - 1) * pageSize, paging.currentPage * pageSize);
-    res.status(200).send({
-        errors: [],
-        data: {
-            elements: data,
-        },
-        metadata,
-        paging,
-    });
+    res.status(200).send({ data, metadata, paging });
 };
 const hotelDetails = async (req, res) => {
     try {
@@ -174,15 +167,13 @@ const enquiry = async (req, res) => {
         const maxRoomsAllowedPerGuest = room.quantity - bookings.length - totalRooms;
         console.log(hotel);
         res.status(200).send({
-            data: {
-                name: hotel.title,
-                cancellationPolicy: 'Free cancellation 1 day prior to stay',
-                checkInTime: '12:00 PM',
-                checkOutTime: '10:00 AM',
-                currentNightRate: room.price,
-                maxGuestsAllowed: 5,
-                maxRoomsAllowedPerGuest: maxRoomsAllowedPerGuest,
-            },
+            name: hotel.title,
+            cancellationPolicy: 'Free cancellation 1 day prior to stay',
+            checkInTime: '12:00 PM',
+            checkOutTime: '10:00 AM',
+            currentNightRate: room.price,
+            maxGuestsAllowed: 5,
+            maxRoomsAllowedPerGuest: maxRoomsAllowedPerGuest,
         });
     } catch (err) {
         res.status(400).json(err);
@@ -215,7 +206,7 @@ const addReviews = async (req, res) => {
 
         await hotel.save();
 
-        res.status(200).send({ data: { status: 'Review added successfully' } });
+        res.status(200).send({ status: 'Review added successfully' });
     } catch (error) {
         res.status(500).json({ message: 'Error adding review', error });
     }
